@@ -1,0 +1,7 @@
+## Interface: 60000
+## Title: Preech Bg
+## Notes: Yeah yeah.
+## SavedVariablesPerCharacter: Preech_Bg_DisplayOptions, st_scores
+Preech_Bg.lua
+Preech_Bg_Options.lua
+Preech_Bg_Options.xml

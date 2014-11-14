@@ -1,0 +1,98 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+  <Frame name="Preech_Bg_OptionsPanel">
+    <Layers>
+      <Layer level="ARTWORK">
+        <FontString name="$parentTitle" text="Preech Bg" inherits="GameFontNormalLarge" justifyH="CENTER" justifyV="TOP">
+          <Anchors>
+            <Anchor point="TOPLEFT">
+              <Offset>
+                <AbsDimension x="16" y="-16"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+        <FontString name="$parentSubText" inherits="GameFontHighlightSmall" nonspacewrap="true" maxLines="3" justifyH="CENTER" justifyV="TOP">
+          <Size>
+            <AbsDimension y="16" x="0"/>
+          </Size>
+          <Anchors>
+            <Anchor point="TOPLEFT" relativeTo="$parentTitle" relativePoint="BOTTOMLEFT">
+              <Offset>
+                <AbsDimension x="0" y="-8"/>
+              </Offset>
+            </Anchor>
+            <Anchor point="RIGHT">
+              <Offset>
+                <AbsDimension x="-32" y="0"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+    <Scripts>
+      <OnLoad>
+        Preech_Bg_OptionsPanel_OnLoad(self);
+        Preech_Bg_OptionsPanelSubText:SetText('Preech Bg Options');
+      </OnLoad>
+    </Scripts>
+    <Frames>
+      <CheckButton name="$parentDisplayHonorPoints" inherits="InterfaceOptionsCheckButtonTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentSubText" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="-2" y="-8"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnLoad>
+            getglobal(self:GetName() .. 'Text'):SetText('Display Honor Points?');
+          </OnLoad>
+        </Scripts>
+      </CheckButton>
+      <CheckButton name="$parentDisplayHonorableKills" inherits="InterfaceOptionsCheckButtonTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentDisplayHonorPoints" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="0" y="-8"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnLoad>
+            getglobal(self:GetName() .. 'Text'):SetText('Display Honorable Kills?');
+          </OnLoad>
+        </Scripts>
+      </CheckButton>
+      <CheckButton name="$parentDisplayWsgFlagCount" inherits="InterfaceOptionsCheckButtonTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentDisplayHonorableKills" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="0" y="-8"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnLoad>
+            getglobal(self:GetName() .. 'Text'):SetText('Display Warsong Gulch progress?');
+          </OnLoad>
+        </Scripts>
+      </CheckButton>
+      <CheckButton name="$parentDisplayAbEventCount" inherits="InterfaceOptionsCheckButtonTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentDisplayWsgFlagCount" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="0" y="-8"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnLoad>
+            getglobal(self:GetName() .. 'Text'):SetText('Display Arathi Basin progress?');
+          </OnLoad>
+        </Scripts>
+      </CheckButton>
+    </Frames>
+  </Frame> 
+</Ui>
