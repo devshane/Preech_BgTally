@@ -1,6 +1,18 @@
 --
 -- parts of this are ripped from WarsongCountdown
 --
+st_scores = {
+    ['bgs_played'] = 0,
+    ['bgs_won'] = 0,
+    ['this_session_bgs_played'] = 0,
+    ['this_session_bgs_won'] = 0,
+}
+
+st_scored = false
+--st_in_bg = false
+
+st_playerName = ''
+st_playerFaction = 0
 
 Preech_Bg_DisplayOptions = {
     ['DisplayHonorPoints'] = true,
@@ -47,7 +59,7 @@ Preech_Bg_WC_WarsongFactionLookup = {
 
 Preech_Bg_AbFactionLookup = {
     ['Horde'] = 'The Defilers',
-    ['Alliance'] = 'I Dunno',
+    ['Alliance'] = 'The League of Arathor',
 }
 
 -- Faction standings
@@ -64,27 +76,33 @@ S_WC_STANDING8='Exalted';
 Preech_Bg_WC_WarsongFactionName = '';
 
 function Preech_Bg_OnEvent(self, event, arg1, arg2, arg3, arg4)
-    if (event=='ADDON_LOADED' and arg1=='Preech_Bg') then
+    if (event == 'ADDON_LOADED' and arg1 == 'Preech_Bg') then
         SLASH_PREECH_BG1='/preech';
         SLASH_PREECH_BG2='/pbg';
         SlashCmdList['PREECH_BG']=Preech_Bg_ParseParameters;
 
-        Preech_Bg_WC_WarsongFactionName = Preech_Bg_WC_WarsongFactionLookup[UnitFactionGroup('player')];
-        Preech_Bg_AbFactionName = Preech_Bg_AbFactionLookup[UnitFactionGroup('player')];
+        f, _lf = UnitFactionGroup('player')
+        Preech_Bg_WC_WarsongFactionName = Preech_Bg_WC_WarsongFactionLookup[f];
+        Preech_Bg_AbFactionName = Preech_Bg_AbFactionLookup[f];
         Preech_Bg_OptionsPanel_ApplyOptions();
-        Preech_Bg_WriteChatMessage("Preech Bg loaded (/preech)");
-        Preech_Bg_Reset();
-    elseif (event=='CHAT_MSG_COMBAT_HONOR_GAIN' or event=='MERCHANT_UPDATE' or event=='UPDATE_FACTION') then
-        -- just update display
-    elseif (event=='PLAYER_ENTERING_BATTLEGROUND') then
-        Preech_Bg_Reset();
-    end
-    Preech_Bg_UpdateDisplay();
 
-    if (event == 'PLAYER_ENTERING_BATTLEGROUND') then
+        if (st_playerName == '') then
+            p = UnitName('player')
+            st_playerName, x = p
+            if (f == 'Horde') then
+                st_playerFaction = 0
+            else
+                st_playerFaction = 1
+            end
+            st_scores.this_session_bgs_played = 0
+            st_scores.this_session_bgs_won = 0
+        end
+        Preech_Bg_WriteChatMessage("Preech Bg loaded (/preech or /pbg)");
+    elseif (event == 'CHAT_MSG_COMBAT_HONOR_GAIN' or event == 'MERCHANT_UPDATE' or event == 'UPDATE_FACTION') then
+        -- just update display
+    elseif (event == 'PLAYER_ENTERING_BATTLEGROUND') then
+        Preech_Bg_Reset();
         st_scored = false
-        st_in_bg = true
-        --BgTally_Update()
     elseif (event == 'UPDATE_BATTLEFIELD_STATUS') then
         if (not st_scored) then
             winner = GetBattlefieldWinner()
@@ -96,37 +114,22 @@ function Preech_Bg_OnEvent(self, event, arg1, arg2, arg3, arg4)
                     st_scores['bgs_won'] = st_scores['bgs_won'] + 1
                     st_scores['this_session_bgs_won'] = st_scores['this_session_bgs_won'] + 1
                 end
-                st_in_bg = false
-                --BgTally_Update()
             end
         end
-    elseif (event == 'ADDON_LOADED' and arg1 == 'Preech_Bg') then
-        if (st_playerName == '') then
-            p = UnitName('player')
-            st_playerName, x = p
-            f, lf = UnitFactionGroup('player')
-            if (f == 'Horde') then
-                st_playerFaction = 0
-            else
-                st_playerFaction = 1
-            end
-            st_scores.this_session_bgs_played = 0
-            st_scores.this_session_bgs_won = 0
-        end
-        --BgTally_Update()
     end
+    Preech_Bg_UpdateDisplay();
 end
 
 function Preech_Bg_ParseParameters(paramStr)
-    if (paramStr=='options' or paramStr=='opts') then
+    if (paramStr == 'options' or paramStr == 'opts') then
         InterfaceOptionsFrame_OpenToCategory('Preech Bg');
-    elseif (paramStr=='refresh') then
+    elseif (paramStr == 'refresh') then
         Preech_Bg_UpdateDisplay();
-    elseif (paramStr=='lock') then
+    elseif (paramStr == 'lock') then
         preech_frame:EnableMouse(false);
         preech_frame:RegisterForDrag('');
         Preech_Bg_WriteChatMessage("locked");
-    elseif (paramStr=='unlock') then
+    elseif (paramStr == 'unlock') then
         preech_frame:EnableMouse(true);
         preech_frame:RegisterForDrag('LeftButton');
         Preech_Bg_WriteChatMessage("unlocked, use left-click to move");
@@ -200,7 +203,7 @@ function Preech_Bg_CommaValue(amount)
     local formatted = amount
     while true do
         formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
-        if (k==0) then
+        if (k == 0) then
             break
         end
     end
@@ -218,7 +221,7 @@ end
 function Preech_Bg_WC_GetReputation(faction)
     for i=1, GetNumFactions() do
         local name, description, standingId, bottomValue, topValue, earnedValue = GetFactionInfo(i)
-        if (name==faction) then
+        if (name == faction) then
             return earnedValue, standingId
         end
     end
@@ -258,7 +261,7 @@ end
 function Preech_Bg_WC_BuildFlagMessage()
     local reputation, standingId=Preech_Bg_WC_GetReputation(Preech_Bg_WC_WarsongFactionName);
 
-    if (standingId==8) then
+    if (standingId == 8) then
         return '';
     end
     local standingRep=reputation;
@@ -281,23 +284,6 @@ function Preech_Bg_WC_BuildFlagMessage()
 end
 
 --
--- A Battleground tallier
---
-
-st_scores = {
-    ['bgs_played'] = 0,
-    ['bgs_won'] = 0,
-    ['this_session_bgs_played'] = 0,
-    ['this_session_bgs_won'] = 0,
-}
-
-local st_scored = false
-local st_in_bg = false
-
-local st_playerName = ''
-local st_playerFaction = ''
-
---
 -- time any stuns and display statistics about them
 --
 function BgTally_Update()
@@ -315,7 +301,7 @@ function BgTally_Update()
           ' for ' .. BgTally_Colorize(color, st_scores.bgs_played)
     if st_scores.bgs_played > 0 then
         bgmsg = bgmsg .. ' (' ..
-              BgTally_Colorize(color, string.format('%d', st_scores.bgs_won /
+                BgTally_Colorize(color, string.format('%d', st_scores.bgs_won /
                                                             st_scores.bgs_played * 100)) .. '%)'
     end
     bgmsg = bgmsg .. ' all time]'
